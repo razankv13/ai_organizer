@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ai_organizer/core/navigation/app_routes.dart';
 import 'package:ai_organizer/core/theme/app_spacing.dart';
 import 'package:ai_organizer/data/models/attachment.dart';
 import 'package:ai_organizer/data/models/note.dart';
@@ -82,7 +83,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
           // Edit button
           IconButton(
             icon: const Icon(Icons.edit_outlined),
-            onPressed: () => context.go('/notes/${note.id}/edit'),
+            onPressed: () => context.push(AppRoutes.noteEdit(note.id)),
             tooltip: 'notes.edit'.tr(),
           ),
           // More actions menu
@@ -216,7 +217,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/notes/${note.id}/edit'),
+        onPressed: () => context.push('/notes/${note.id}/edit'),
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         tooltip: 'notes.edit'.tr(),
@@ -252,7 +253,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
     return folderAsync.when(
       data: (folderPath) {
         return GestureDetector(
-          onTap: () => context.go('/notes?folderId=$folderId'),
+          onTap: () => context.push(AppRoutes.notesWithFolder(folderId)),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
             decoration: BoxDecoration(
@@ -479,7 +480,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => context.go('/notes/${note.id}'),
+          onTap: () => context.push(AppRoutes.noteDetail(note.id)),
           borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
           child: Container(
             padding: const EdgeInsets.all(AppSpacing.sm),
@@ -720,7 +721,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
               ),
               const SizedBox(height: AppSpacing.xl),
               FilledButton.icon(
-                onPressed: () => context.go('/notes'),
+                onPressed: () => context.go(AppRoutes.notes),
                 icon: const Icon(Icons.arrow_back),
                 label: const Text('Back to Notes'),
               ),
@@ -762,7 +763,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   OutlinedButton.icon(
-                    onPressed: () => context.go('/notes'),
+                    onPressed: () => context.go(AppRoutes.notes),
                     icon: const Icon(Icons.arrow_back),
                     label: const Text('Back to Notes'),
                   ),
@@ -828,7 +829,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
-                  context.go('/notes');
+                  context.go(AppRoutes.notes);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -901,7 +902,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
 
     // Navigate to the note
     if (context.mounted) {
-      await context.push('/note/${targetNote.id}');
+      await context.push(AppRoutes.noteDetail(targetNote.id));
     }
   }
 }

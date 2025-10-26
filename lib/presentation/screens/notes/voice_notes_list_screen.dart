@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:ai_organizer/core/navigation/app_routes.dart';
 import 'package:ai_organizer/core/theme/app_spacing.dart';
 import 'package:ai_organizer/providers/notes_provider.dart';
 import 'package:ai_organizer/providers/database_provider.dart';
@@ -137,7 +138,7 @@ class _VoiceNotesListScreenState extends ConsumerState<VoiceNotesListScreen> {
               icon: const Icon(Icons.mic),
               iconSize: AppSpacing.iconSize,
               onPressed: () {
-                context.go('/notes/voice');
+                context.push(AppRoutes.voiceNote);
               },
               tooltip: 'Record new voice note',
             ),
@@ -215,7 +216,7 @@ class _VoiceNotesListScreenState extends ConsumerState<VoiceNotesListScreen> {
               height: AppSpacing.minTouchTarget,
               child: FilledButton.icon(
                 onPressed: () {
-                  context.go('/notes/voice');
+                  context.push(AppRoutes.voiceNote);
                 },
                 style: FilledButton.styleFrom(
                   backgroundColor: colorScheme.primary,
@@ -300,7 +301,7 @@ class _VoiceNotesListScreenState extends ConsumerState<VoiceNotesListScreen> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            context.go('/notes/${note.id}');
+            context.push(AppRoutes.noteDetail(note.id));
           },
           borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           splashColor: colorScheme.onSurface.withValues(alpha: 0.06),

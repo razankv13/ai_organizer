@@ -2,9 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ai_organizer/core/navigation/app_routes.dart';
 import 'package:ai_organizer/core/theme/app_spacing.dart';
 import 'package:ai_organizer/providers/notes_provider.dart';
 import 'package:ai_organizer/data/models/note.dart';
+import 'package:ai_organizer/presentation/widgets/note_card.dart';
+import 'package:ai_organizer/presentation/widgets/empty_state.dart';
+import 'package:ai_organizer/presentation/widgets/action_sheet.dart';
+
+/// Sort options for search results
+enum SearchSortOption {
+  mostRecent,
+  alphabetical,
+  bestMatch,
+}
 
 /// Search screen - AI-powered search functionality
 class SearchScreen extends ConsumerStatefulWidget {
@@ -23,6 +34,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
   String _currentQuery = '';
   bool _isAiSearch = false;
   bool _isSearchFocused = false;
+  SearchSortOption _currentSortOption = SearchSortOption.bestMatch;
   List<String> _searchHistory = [];
   final List<String> _quickSearches = [
     'notes from today',
@@ -148,6 +160,38 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         _isAiSearch = query.length >= 3 && !_isSimpleQuery(query);
       });
     }
+  }
+
+  /// Sort notes based on the current sort option
+  List<Note> _sortNotes(List<Note> notes) {
+    final sortedNotes = List<Note>.from(notes);
+
+    switch (_currentSortOption) {
+      case SearchSortOption.mostRecent:
+        // Sort by updated date (most recent first)
+        sortedNotes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+        break;
+
+      case SearchSortOption.alphabetical:
+        // Sort alphabetically by title (case-insensitive)
+        sortedNotes.sort((a, b) {
+          final titleA = a.title.toLowerCase();
+          final titleB = b.title.toLowerCase();
+          // Handle untitled notes - put them at the end
+          if (titleA.isEmpty && titleB.isEmpty) return 0;
+          if (titleA.isEmpty) return 1;
+          if (titleB.isEmpty) return -1;
+          return titleA.compareTo(titleB);
+        });
+        break;
+
+      case SearchSortOption.bestMatch:
+        // Keep original order (relevance from search provider)
+        // The search provider already returns results sorted by relevance
+        break;
+    }
+
+    return sortedNotes;
   }
 
   @override
@@ -593,6 +637,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
+    // Apply sorting before displaying results
+    final sortedNotes = _sortNotes(notes);
+
     return Column(
       children: [
         // Results header
@@ -630,9 +677,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         Expanded(
           child: ListView.builder(
             padding: EdgeInsets.zero,
-            itemCount: notes.length,
+            itemCount: sortedNotes.length,
             itemBuilder: (context, index) {
-              return _buildSearchResultCard(context, notes[index]);
+              return _buildSearchResultCard(context, sortedNotes[index]);
             },
           ),
         ),
@@ -641,514 +688,108 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
   }
 
   Widget _buildSearchResultCard(BuildContext context, Note note) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    // Highlight search terms in content
-    final highlightedContent = _highlightSearchTerms(note.preview, _currentQuery);
-
-    return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.screenHorizontal,
-        vertical: AppSpacing.listItemSpacing / 2,
-      ),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-        boxShadow: AppShadows.cardShadow,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => context.go('/notes/${note.id}'),
-          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-          splashColor: colorScheme.onSurface.withValues(alpha: 0.06),
-          highlightColor: colorScheme.onSurface.withValues(alpha: 0.03),
-          child: Semantics(
-            label: 'Note: ${note.title.isNotEmpty ? note.title : "Untitled"}',
-            hint: 'Tap to open note',
-            button: true,
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.cardPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                // Title with status indicators
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        note.title.isNotEmpty ? note.title : 'Untitled',
-                        style: textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurface,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (note.isPinned) ...[
-                      Icon(
-                        Icons.push_pin,
-                        size: 16,
-                        color: colorScheme.primary,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                    ],
-                    if (note.isFavorite) ...[
-                      Icon(
-                        Icons.favorite,
-                        size: 16,
-                        color: colorScheme.error,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                    ],
-                  ],
-                ),
-
-                // Content preview with highlights
-                if (note.content.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.xs),
-                  RichText(
-                    text: highlightedContent,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-
-                const SizedBox(height: AppSpacing.sm),
-
-                // Tags
-                if (note.tags.isNotEmpty) ...[
-                  Wrap(
-                    spacing: AppSpacing.xs,
-                    runSpacing: AppSpacing.xs,
-                    children: note.tags.take(3).map((tag) {
-                      final isHighlighted = tag
-                          .toLowerCase()
-                          .contains(_currentQuery.toLowerCase());
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.xs,
-                          vertical: AppSpacing.xxs,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isHighlighted
-                              ? colorScheme.primaryContainer.withValues(alpha: 0.3)
-                              : colorScheme.surfaceContainerHighest,
-                          borderRadius:
-                              BorderRadius.circular(AppSpacing.radiusXs),
-                          border: isHighlighted
-                              ? Border.all(
-                                  color: colorScheme.primary.withValues(alpha: 0.3),
-                                )
-                              : null,
-                        ),
-                        child: Text(
-                          '#$tag',
-                          style: textTheme.labelSmall?.copyWith(
-                            color: isHighlighted
-                                ? colorScheme.primary
-                                : colorScheme.onSurfaceVariant,
-                            fontWeight:
-                                isHighlighted ? FontWeight.w600 : FontWeight.w500,
-                            fontSize: 12,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                ],
-
-                // Footer with timestamp and match indicator
-                Row(
-                  children: [
-                    Icon(
-                      Icons.access_time,
-                      size: 12,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Text(
-                      _formatDateTime(note.updatedAt),
-                      style: textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 11,
-                      ),
-                    ),
-                    const Spacer(),
-                    Icon(
-                      Icons.search,
-                      size: 12,
-                      color: colorScheme.primary,
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Text(
-                      'Match found',
-                      style: textTheme.labelSmall?.copyWith(
-                        color: colorScheme.primary,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+    // Use the shared NoteCard widget for consistent design
+    return NoteCard(
+      note: note,
+      onTap: () => context.push(AppRoutes.noteDetail(note.id)),
     );
   }
 
-  TextSpan _highlightSearchTerms(String text, String query) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    if (query.isEmpty) {
-      return TextSpan(
-        text: text,
-        style: textTheme.bodyMedium?.copyWith(
-          color: colorScheme.onSurfaceVariant,
-        ),
-      );
-    }
-
-    final lowerText = text.toLowerCase();
-    final lowerQuery = query.toLowerCase();
-    final spans = <TextSpan>[];
-
-    int start = 0;
-    int index = lowerText.indexOf(lowerQuery);
-
-    while (index != -1) {
-      // Add text before the match
-      if (index > start) {
-        spans.add(TextSpan(
-          text: text.substring(start, index),
-          style: textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ));
-      }
-
-      // Add highlighted match with theme-aware background
-      spans.add(TextSpan(
-        text: text.substring(index, index + query.length),
-        style: textTheme.bodyMedium?.copyWith(
-          color: colorScheme.primary,
-          fontWeight: FontWeight.w600,
-          backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
-        ),
-      ));
-
-      start = index + query.length;
-      index = lowerText.indexOf(lowerQuery, start);
-    }
-
-    // Add remaining text
-    if (start < text.length) {
-      spans.add(TextSpan(
-        text: text.substring(start),
-        style: textTheme.bodyMedium?.copyWith(
-          color: colorScheme.onSurfaceVariant,
-        ),
-      ));
-    }
-
-    return TextSpan(children: spans);
-  }
-
   Widget _buildNoResultsState(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return AnimatedOpacity(
-      opacity: 1.0,
-      duration: AppSpacing.animationDuration, // 250ms fade-in
-      curve: Curves.easeInOut,
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xxxl),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Large icon with subtle color
-              Icon(
-                Icons.search_off,
-                size: 64,
-                color: colorScheme.outlineVariant,
-              ),
-              const SizedBox(height: AppSpacing.xl), // 24dp spacing
-
-              // Title with proper hierarchy
-              Text(
-                'No Results Found',
-                style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 20,
-                  color: colorScheme.onSurface,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSpacing.sm), // 12dp spacing
-
-              // Message with secondary text color
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                child: Text(
-                  'No notes match "$_currentQuery". Try different keywords or check your spelling.',
-                  style: textTheme.bodyMedium?.copyWith(
-                    fontSize: 14,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-
-              const SizedBox(height: AppSpacing.xl), // 24dp spacing before actions
-
-              // Action buttons with proper theming
-              Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                alignment: WrapAlignment.center,
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      _searchController.clear();
-                      setState(() => _currentQuery = '');
-                      _searchFocus.requestFocus();
-                    },
-                    icon: const Icon(Icons.clear, size: 18),
-                    label: const Text('Clear Search'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: colorScheme.primary,
-                      side: BorderSide(color: colorScheme.outline),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: AppSpacing.sm,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                      ),
-                    ),
-                  ),
-                  FilledButton.icon(
-                    onPressed: () => context.go('/notes/create'),
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Create Note'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: colorScheme.primary,
-                      foregroundColor: colorScheme.onPrimary,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: AppSpacing.sm,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+    // Use the shared EmptyState widget for consistent design
+    return EmptyState(
+      icon: Icons.search_off,
+      title: 'No Results Found',
+      message: 'No notes match "$_currentQuery". Try different keywords or check your spelling.',
     );
   }
 
   void _showSearchFilters(BuildContext context) {
-    showModalBottomSheet(
+    // Use shared ActionSheet widget for consistent design
+    ActionSheet.show(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        // Dark modal background as per design spec
-        decoration: BoxDecoration(
-          color: const Color(0xFF3A3A3A), // Intentional dark modal
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(AppSpacing.radiusMd),
-          ),
-          boxShadow: AppShadows.modalShadow,
+      title: 'Search Filters',
+      items: [
+        ActionSheetItem(
+          icon: Icons.push_pin,
+          title: 'Pinned Notes Only',
+          onTap: () => _performSearch('pinned'),
         ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Handle indicator
-              Container(
-                width: 36,
-                height: 4,
-                margin: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.3), // 30% white for dark modal
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-
-              // Filter items
-              _buildModalItem(
-                context,
-                icon: Icons.push_pin,
-                title: 'Pinned Notes Only',
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _performSearch('pinned');
-                },
-              ),
-              _buildModalItem(
-                context,
-                icon: Icons.favorite,
-                title: 'Favorite Notes Only',
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _performSearch('favorites');
-                },
-              ),
-              _buildModalItem(
-                context,
-                icon: Icons.archive,
-                title: 'Archived Notes Only',
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _performSearch('archived');
-                },
-              ),
-              _buildModalItem(
-                context,
-                icon: Icons.today,
-                title: 'Notes from Today',
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _performSearch('today');
-                },
-              ),
-
-              const SizedBox(height: AppSpacing.sm),
-            ],
-          ),
+        ActionSheetItem(
+          icon: Icons.favorite,
+          title: 'Favorite Notes Only',
+          onTap: () => _performSearch('favorites'),
         ),
-      ),
+        ActionSheetItem(
+          icon: Icons.archive,
+          title: 'Archived Notes Only',
+          onTap: () => _performSearch('archived'),
+        ),
+        ActionSheetItem(
+          icon: Icons.today,
+          title: 'Notes from Today',
+          onTap: () => _performSearch('today'),
+        ),
+      ],
     );
   }
 
   void _showSortOptions(BuildContext context) {
-    showModalBottomSheet(
+    // Use shared ActionSheet widget for consistent design
+    ActionSheet.show(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        // Dark modal background as per design spec
-        decoration: BoxDecoration(
-          color: const Color(0xFF3A3A3A), // Intentional dark modal
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(AppSpacing.radiusMd),
-          ),
-          boxShadow: AppShadows.modalShadow,
+      title: 'Sort Results',
+      items: [
+        ActionSheetItem(
+          icon: Icons.access_time,
+          title: 'Most Recent',
+          onTap: () {
+            setState(() {
+              _currentSortOption = SearchSortOption.mostRecent;
+            });
+          },
+          trailing: _currentSortOption == SearchSortOption.mostRecent
+              ? Icon(
+                  Icons.check,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                )
+              : null,
         ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Handle indicator
-              Container(
-                width: 36,
-                height: 4,
-                margin: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.3), // 30% white for dark modal
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-
-              // Sort items
-              _buildModalItem(
-                context,
-                icon: Icons.access_time,
-                title: 'Most Recent',
-                onTap: () => Navigator.of(context).pop(),
-              ),
-              _buildModalItem(
-                context,
-                icon: Icons.title,
-                title: 'Alphabetical',
-                onTap: () => Navigator.of(context).pop(),
-              ),
-              _buildModalItem(
-                context,
-                icon: Icons.search,
-                title: 'Best Match',
-                onTap: () => Navigator.of(context).pop(),
-              ),
-
-              const SizedBox(height: AppSpacing.sm),
-            ],
-          ),
+        ActionSheetItem(
+          icon: Icons.title,
+          title: 'Alphabetical',
+          onTap: () {
+            setState(() {
+              _currentSortOption = SearchSortOption.alphabetical;
+            });
+          },
+          trailing: _currentSortOption == SearchSortOption.alphabetical
+              ? Icon(
+                  Icons.check,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                )
+              : null,
         ),
-      ),
+        ActionSheetItem(
+          icon: Icons.search,
+          title: 'Best Match',
+          onTap: () {
+            setState(() {
+              _currentSortOption = SearchSortOption.bestMatch;
+            });
+          },
+          trailing: _currentSortOption == SearchSortOption.bestMatch
+              ? Icon(
+                  Icons.check,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                )
+              : null,
+        ),
+      ],
     );
   }
 
-  Widget _buildModalItem(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-    bool isDestructive = false,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        splashColor: Colors.white.withValues(alpha: 0.1),
-        highlightColor: Colors.white.withValues(alpha: 0.05),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xl,
-            vertical: AppSpacing.md,
-          ),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 22,
-                color: isDestructive
-                    ? colorScheme.error // Use semantic error color
-                    : Colors.white, // White on dark modal
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
-                  color: isDestructive
-                      ? colorScheme.error
-                      : Colors.white, // White on dark modal
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
-      return 'Just now';
-    }
-  }
 } 

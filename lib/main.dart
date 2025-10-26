@@ -1,13 +1,12 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:ai_organizer/config/supabase_config.dart';
+import 'package:ai_organizer/core/navigation/app_router.dart';
+import 'package:ai_organizer/core/theme/app_theme.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
-import 'package:ai_organizer/core/theme/app_theme.dart';
-import 'package:ai_organizer/routes/app_router.dart';
-import 'package:ai_organizer/config/supabase_config.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -87,8 +86,6 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(routerProvider);
-    
     return AdaptiveTheme(
       light: AppTheme.light(
         languageCode: context.locale.languageCode,
@@ -105,7 +102,7 @@ class MyApp extends ConsumerWidget {
         supportedLocales: context.supportedLocales,
         locale: context.locale,
         debugShowCheckedModeBanner: false,
-        routerConfig: router,
+        routerConfig: AppRouter.router,
       ),
     );
   }

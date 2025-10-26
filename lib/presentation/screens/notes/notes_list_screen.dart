@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ai_organizer/core/navigation/app_routes.dart';
 import 'package:ai_organizer/core/theme/app_spacing.dart';
 import 'package:ai_organizer/providers/folder_provider.dart';
 import 'package:ai_organizer/providers/notes_provider.dart';
@@ -12,7 +13,6 @@ import 'package:ai_organizer/presentation/widgets/note_card.dart';
 import 'package:ai_organizer/presentation/widgets/app_search_bar.dart';
 import 'package:ai_organizer/presentation/widgets/simple_tab_bar.dart';
 import 'package:ai_organizer/presentation/widgets/action_sheet.dart';
-import 'package:ai_organizer/presentation/widgets/app_bottom_nav.dart';
 import 'package:ai_organizer/presentation/widgets/skeletons/note_list_skeleton.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -261,13 +261,12 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/notes/new'),
+        onPressed: () => context.push(AppRoutes.noteCreate),
         tooltip: 'notes.create'.tr(),
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         child: const Icon(Icons.add),
       ),
-      bottomNavigationBar: AppBottomNav.fromRoute('/notes'),
     );
   }
 
@@ -321,7 +320,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
                       style: textTheme.labelMedium,
                     ),
                     deleteIcon: const Icon(Icons.close, size: 16),
-                    onDeleted: () => context.go('/notes'),
+                    onDeleted: () => context.go(AppRoutes.notes),
                   ),
                   loading: () => Chip(
                     backgroundColor: colorScheme.surfaceContainerHighest,
@@ -405,7 +404,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
                       if (_isSelectionMode) {
                         _toggleNoteSelection(note.id);
                       } else {
-                        context.go('/notes/${note.id}');
+                        context.push(AppRoutes.noteDetail(note.id));
                       }
                     },
                     onLongPress: () async {
@@ -462,7 +461,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
                 if (_isSelectionMode) {
                   _toggleNoteSelection(note.id);
                 } else {
-                  context.go('/notes/${note.id}');
+                  context.push('/notes/${note.id}');
                 }
               },
               onLongPress: () async {
@@ -677,7 +676,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
                 _searchQuery.isEmpty) ...[
               const SizedBox(height: AppSpacing.xl),
               FilledButton.icon(
-                onPressed: () => context.go('/notes/new'),
+                onPressed: () => context.push(AppRoutes.noteCreate),
                 icon: const Icon(Icons.add),
                 label: Text('notes.create'.tr()),
                 style: FilledButton.styleFrom(
@@ -794,7 +793,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
         ActionSheetItem(
           title: 'notes.edit'.tr(),
           icon: Icons.edit,
-          onTap: () => context.go('/notes/${note.id}/edit'),
+          onTap: () => context.push(AppRoutes.noteEdit(note.id)),
         ),
         ActionSheetItem(
           title: note.isPinned ? 'notes.unpin'.tr() : 'notes.pin'.tr(),
@@ -896,7 +895,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
         ActionSheetItem(
           title: 'common.settings'.tr(),
           icon: Icons.settings,
-          onTap: () => context.go('/settings'),
+          onTap: () => context.push(AppRoutes.settings),
         ),
       ],
     );

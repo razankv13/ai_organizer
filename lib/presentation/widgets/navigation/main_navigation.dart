@@ -114,7 +114,6 @@ class MainNavigation extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
         child: Container(
           padding: const EdgeInsets.symmetric(
-            vertical: AppSpacing.sm,
             horizontal: AppSpacing.xs,
           ),
           child: Column(
@@ -127,7 +126,7 @@ class MainNavigation extends StatelessWidget {
                     : colorScheme.onSurface.withValues(alpha: 0.6),
                 size: 24,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xxxs),
               Text(
                 label,
                 style: theme.textTheme.labelSmall?.copyWith(

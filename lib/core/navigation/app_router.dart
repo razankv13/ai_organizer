@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ai_organizer/core/navigation/app_routes.dart';
 import 'package:ai_organizer/presentation/screens/home/home_screen.dart';
 import 'package:ai_organizer/presentation/screens/notes/notes_list_screen.dart';
 import 'package:ai_organizer/presentation/screens/notes/note_detail_screen.dart';
@@ -11,6 +12,7 @@ import 'package:ai_organizer/presentation/screens/search/search_screen.dart';
 import 'package:ai_organizer/presentation/screens/organize/organize_screen.dart';
 import 'package:ai_organizer/presentation/screens/settings/settings_screen.dart';
 import 'package:ai_organizer/presentation/screens/settings/export_import_screen.dart';
+import 'package:ai_organizer/presentation/screens/profile/profile_screen.dart';
 import 'package:ai_organizer/presentation/screens/profile/edit_profile_screen.dart';
 import 'package:ai_organizer/presentation/screens/profile/appearance_settings_screen.dart';
 import 'package:ai_organizer/presentation/screens/profile/notification_settings_screen.dart';
@@ -21,7 +23,6 @@ import 'package:ai_organizer/presentation/screens/integrations/email_integration
 import 'package:ai_organizer/presentation/screens/integrations/gmail_import_screen.dart';
 import 'package:ai_organizer/presentation/screens/integrations/calendar_integration_screen.dart';
 import 'package:ai_organizer/presentation/screens/integrations/cloud_storage_screen.dart';
-import 'package:ai_organizer/presentation/screens/calendar/calendar_view_screen.dart';
 import 'package:ai_organizer/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:ai_organizer/presentation/widgets/navigation/main_navigation.dart';
 
@@ -37,16 +38,23 @@ class AppRouter {
   static final _settingsNavigatorKey = GlobalKey<NavigatorState>();
 
   static final GoRouter router = GoRouter(
-    initialLocation: '/',
+    initialLocation: AppRoutes.home,
     navigatorKey: _rootNavigatorKey,
     routes: [
       // Onboarding route
       GoRoute(
-        path: '/onboarding',
-        name: 'onboarding',
+        path: AppRoutes.onboarding,
+        name: AppRouteNames.onboarding,
         builder: (context, state) => const OnboardingScreen(),
       ),
-      
+
+      // Profile route
+      GoRoute(
+        path: AppRoutes.profile,
+        name: AppRouteNames.profile,
+        builder: (context, state) => const ProfileScreen(),
+      ),
+
       // Main StatefulShell route with bottom navigation
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) {
@@ -58,8 +66,8 @@ class AppRouter {
             navigatorKey: _homeNavigatorKey,
             routes: [
               GoRoute(
-                path: '/',
-                name: 'home',
+                path: AppRoutes.home,
+                name: AppRouteNames.home,
                 builder: (context, state) => const HomeScreen(),
               ),
             ],
@@ -70,8 +78,8 @@ class AppRouter {
             navigatorKey: _notesNavigatorKey,
             routes: [
               GoRoute(
-                path: '/notes',
-                name: 'notes',
+                path: AppRoutes.notes,
+                name: AppRouteNames.notes,
                 builder: (context, state) {
                   final folderId = state.uri.queryParameters['folderId'];
                   return NotesListScreen(folderId: folderId);
@@ -79,25 +87,25 @@ class AppRouter {
                 routes: [
                   GoRoute(
                     path: 'create',
-                    name: 'note-create',
+                    name: AppRouteNames.noteCreate,
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const NoteEditScreen(),
                   ),
                   GoRoute(
                     path: 'voice',
-                    name: 'voice-note',
+                    name: AppRouteNames.voiceNote,
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const VoiceNoteScreen(),
                   ),
                   GoRoute(
                     path: 'voice-list',
-                    name: 'voice-notes-list',
+                    name: AppRouteNames.voiceNotesList,
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const VoiceNotesListScreen(),
                   ),
                   GoRoute(
                     path: ':id',
-                    name: 'note-detail',
+                    name: AppRouteNames.noteDetail,
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) {
                       final id = state.pathParameters['id']!;
@@ -106,7 +114,7 @@ class AppRouter {
                     routes: [
                       GoRoute(
                         path: 'edit',
-                        name: 'note-edit',
+                        name: AppRouteNames.noteEdit,
                         parentNavigatorKey: _rootNavigatorKey,
                         builder: (context, state) {
                           final id = state.pathParameters['id']!;
@@ -115,7 +123,7 @@ class AppRouter {
                       ),
                       GoRoute(
                         path: 'share',
-                        name: 'note-share',
+                        name: AppRouteNames.noteShare,
                         parentNavigatorKey: _rootNavigatorKey,
                         builder: (context, state) {
                           final id = state.pathParameters['id']!;
@@ -135,20 +143,20 @@ class AppRouter {
             navigatorKey: _searchNavigatorKey,
             routes: [
               GoRoute(
-                path: '/search',
-                name: 'search',
+                path: AppRoutes.search,
+                name: AppRouteNames.search,
                 builder: (context, state) => const SearchScreen(),
               ),
             ],
           ),
-          
+
           // Organize tab branch
           StatefulShellBranch(
             navigatorKey: _organizeNavigatorKey,
             routes: [
               GoRoute(
-                path: '/organize',
-                name: 'organize',
+                path: AppRoutes.organize,
+                name: AppRouteNames.organize,
                 builder: (context, state) => const OrganizeScreen(),
               ),
             ],
@@ -159,63 +167,63 @@ class AppRouter {
             navigatorKey: _settingsNavigatorKey,
             routes: [
               GoRoute(
-                path: '/settings',
-                name: 'settings',
+                path: AppRoutes.settings,
+                name: AppRouteNames.settings,
                 builder: (context, state) => const SettingsScreen(),
                 routes: [
                   // Profile management routes
                   GoRoute(
                     path: 'edit-profile',
-                    name: 'edit-profile',
+                    name: AppRouteNames.editProfile,
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const EditProfileScreen(),
                   ),
                   GoRoute(
                     path: 'appearance',
-                    name: 'appearance-settings',
+                    name: AppRouteNames.appearanceSettings,
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const AppearanceSettingsScreen(),
                   ),
                   GoRoute(
                     path: 'notifications',
-                    name: 'notification-settings',
+                    name: AppRouteNames.notificationSettings,
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const NotificationSettingsScreen(),
                   ),
                   GoRoute(
                     path: 'language',
-                    name: 'language-settings',
+                    name: AppRouteNames.languageSettings,
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const LanguageSettingsScreen(),
                   ),
                   GoRoute(
                     path: 'storage-sync',
-                    name: 'storage-sync-settings',
+                    name: AppRouteNames.storageSyncSettings,
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const StorageSyncSettingsScreen(),
                   ),
                   GoRoute(
                     path: 'change-password',
-                    name: 'change-password',
+                    name: AppRouteNames.changePassword,
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const ChangePasswordScreen(),
                   ),
                   // Other settings routes
                   GoRoute(
                     path: 'export-import',
-                    name: 'export-import',
+                    name: AppRouteNames.exportImport,
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const ExportImportScreen(),
                   ),
                   GoRoute(
                     path: 'email-integration',
-                    name: 'email-integration',
+                    name: AppRouteNames.emailIntegration,
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const EmailIntegrationScreen(),
                     routes: [
                       GoRoute(
                         path: 'gmail-import',
-                        name: 'gmail-import',
+                        name: AppRouteNames.gmailImport,
                         parentNavigatorKey: _rootNavigatorKey,
                         builder: (context, state) => const GmailImportScreen(),
                       ),
@@ -223,13 +231,13 @@ class AppRouter {
                   ),
                   GoRoute(
                     path: 'calendar-integration',
-                    name: 'calendar-integration',
+                    name: AppRouteNames.calendarIntegration,
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const CalendarIntegrationScreen(),
                   ),
                   GoRoute(
                     path: 'cloud-storage',
-                    name: 'cloud-storage',
+                    name: AppRouteNames.cloudStorage,
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const CloudStorageIntegrationScreen(),
                   ),
@@ -263,7 +271,7 @@ class AppRouter {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => context.go('/'),
+              onPressed: () => context.go(AppRoutes.home),
               child: const Text('Go Home'),
             ),
           ],
@@ -276,75 +284,81 @@ class AppRouter {
 /// Navigation helper extensions
 extension AppRouterExtension on BuildContext {
   /// Navigate to home screen
-  void goHome() => go('/');
-  
+  void goHome() => go(AppRoutes.home);
+
   /// Navigate to notes list
-  void goNotes() => go('/notes');
-  
+  void goNotes() => go(AppRoutes.notes);
+
   /// Navigate to specific note
-  void goNote(String noteId) => go('/notes/$noteId');
-  
+  void goNote(String noteId) => go(AppRoutes.noteDetail(noteId));
+
   /// Navigate to note edit
   void goNoteEdit(String? noteId) {
     if (noteId != null) {
-      go('/notes/$noteId/edit');
+      go(AppRoutes.noteEdit(noteId));
     } else {
-      go('/notes/create');
+      go(AppRoutes.noteCreate);
     }
   }
 
   /// Navigate to note sharing screen
   void goNoteShare(String noteId, String noteTitle) {
-    go('/notes/$noteId/share?title=${Uri.encodeComponent(noteTitle)}');
+    go(AppRoutes.noteShare(noteId, noteTitle));
   }
 
   /// Navigate to voice note recording
-  void goVoiceNote() => go('/notes/voice');
+  void goVoiceNote() => go(AppRoutes.voiceNote);
 
   /// Navigate to voice notes list
-  void goVoiceNotesList() => go('/notes/voice-list');
+  void goVoiceNotesList() => go(AppRoutes.voiceNotesList);
 
   /// Navigate to search
-  void goSearch() => go('/search');
-  
+  void goSearch() => go(AppRoutes.search);
+
   /// Navigate to organize
-  void goOrganize() => go('/organize');
-  
+  void goOrganize() => go(AppRoutes.organize);
+
   /// Navigate to settings
-  void goSettings() => go('/settings');
-  
+  void goSettings() => go(AppRoutes.settings);
+
+  /// Navigate to profile
+  void goProfile() => go(AppRoutes.profile);
+
   /// Navigate to onboarding
-  void goOnboarding() => go('/onboarding');
+  void goOnboarding() => go(AppRoutes.onboarding);
 
   /// Navigate to email integration settings
-  void goEmailIntegration() => go('/settings/email-integration');
+  void goEmailIntegration() => go(AppRoutes.emailIntegration);
 
   /// Navigate to Gmail import
-  void goGmailImport() => go('/settings/email-integration/gmail-import');
+  void goGmailImport() => go(AppRoutes.gmailImport);
 
   /// Navigate to calendar integration settings
-  void goCalendarIntegration() => go('/settings/calendar-integration');
+  void goCalendarIntegration() => go(AppRoutes.calendarIntegration);
 
   /// Navigate to cloud storage integration settings
-  void goCloudStorage() => go('/settings/cloud-storage');
+  void goCloudStorage() => go(AppRoutes.cloudStorage);
 
   /// Navigate to edit profile screen
-  void goEditProfile() => go('/settings/edit-profile');
+  void goEditProfile() => go(AppRoutes.editProfile);
 
   /// Navigate to appearance settings
-  void goAppearanceSettings() => go('/settings/appearance');
+  void goAppearanceSettings() => go(AppRoutes.appearanceSettings);
 
   /// Navigate to notification settings
-  void goNotificationSettings() => go('/settings/notifications');
+  void goNotificationSettings() => go(AppRoutes.notificationSettings);
 
   /// Navigate to language settings
-  void goLanguageSettings() => go('/settings/language');
+  void goLanguageSettings() => go(AppRoutes.languageSettings);
 
   /// Navigate to storage & sync settings
-  void goStorageSyncSettings() => go('/settings/storage-sync');
+  void goStorageSyncSettings() => go(AppRoutes.storageSyncSettings);
 
   /// Navigate to change password screen
-  void goChangePassword() => go('/settings/change-password');
+  void goChangePassword() => go(AppRoutes.changePassword);
+
+  /// Navigate to export/import screen
+  void goExportImport() => go(AppRoutes.exportImport);
 
   /// Navigate back or to home if no history
   void goBackOrHome() {

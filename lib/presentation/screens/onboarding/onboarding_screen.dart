@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ai_organizer/core/navigation/app_routes.dart';
 import 'package:ai_organizer/core/theme/app_spacing.dart';
 import 'package:ai_organizer/presentation/widgets/primary_button.dart';
 import 'package:ai_organizer/presentation/widgets/secondary_button.dart';
@@ -63,11 +64,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _getStarted() {
-    context.go('/');
+    context.go(AppRoutes.home);
   }
 
   void _skip() {
-    context.go('/');
+    context.go(AppRoutes.home);
   }
 
   @override

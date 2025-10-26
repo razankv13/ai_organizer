@@ -1,4 +1,5 @@
 import 'package:ai_organizer/core/accessibility/semantic_labels.dart';
+import 'package:ai_organizer/core/navigation/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -129,13 +130,13 @@ class AppBottomNav extends StatelessWidget {
     
     switch (index) {
       case 0:
-        context.go('/');
+        context.go(AppRoutes.home);
         break;
       case 1:
-        context.go('/notes');
+        context.go(AppRoutes.notes);
         break;
       case 2:
-        context.go('/profile');
+        context.go(AppRoutes.profile);
         break;
     }
   }

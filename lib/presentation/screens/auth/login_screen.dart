@@ -1,3 +1,4 @@
+import 'package:ai_organizer/core/navigation/app_routes.dart';
 import 'package:ai_organizer/core/theme/app_colors.dart';
 import 'package:ai_organizer/core/theme/app_spacing.dart';
 import 'package:ai_organizer/core/theme/app_typography.dart';
@@ -678,7 +679,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
       if (response.user != null) {
         if (mounted) {
-          context.go('/');
+          context.go(AppRoutes.home);
         }
       }
     } on AuthException catch (e) {
@@ -718,7 +719,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 
   void _navigateToSignUp() {
-    context.push('/signup');
+    context.push(AppRoutes.signup);
   }
 
   Future<void> _forgotPassword() async {

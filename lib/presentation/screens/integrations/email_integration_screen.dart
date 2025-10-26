@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ai_organizer/core/navigation/app_routes.dart';
 import 'package:ai_organizer/providers/email_provider.dart';
 import 'package:ai_organizer/core/theme/app_spacing.dart';
 
@@ -343,7 +344,7 @@ class _EmailIntegrationScreenState extends ConsumerState<EmailIntegrationScreen>
                             children: [
                               FilledButton.icon(
                                 onPressed: () {
-                                  context.push('/email-integration/gmail-import');
+                                  context.push(AppRoutes.gmailImport);
                                 },
                                 icon: Icon(Icons.download, size: AppSpacing.iconSizeSmall),
                                 label: const Text('Import Emails'),

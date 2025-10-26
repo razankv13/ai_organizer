@@ -1,12 +1,14 @@
 import 'dart:async';
+
+import 'package:ai_organizer/core/navigation/app_router.dart';
+import 'package:ai_organizer/core/navigation/app_routes.dart';
+import 'package:ai_organizer/core/theme/app_spacing.dart';
+import 'package:ai_organizer/providers/auth_provider.dart';
+import 'package:ai_organizer/providers/sync_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:ai_organizer/core/theme/app_spacing.dart';
-import 'package:ai_organizer/core/navigation/app_router.dart';
-import 'package:ai_organizer/providers/auth_provider.dart';
-import 'package:ai_organizer/providers/sync_provider.dart';
 
 /// User profile screen - redesigned following UI/UX guidelines
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -60,7 +62,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     if (user == null) {
       // If no user is logged in, redirect to login
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.go('/login');
+        context.go(AppRoutes.login);
       });
       return const SizedBox.shrink();
     }
@@ -70,18 +72,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       appBar: AppBar(
         backgroundColor: colorScheme.surface,
         elevation: 0,
-        title: Text(
-          'Profile',
-          style: textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
+          onPressed: () => context.pop(),
+          tooltip: 'Back',
         ),
+        title: Text('Profile', style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
         actions: [
           IconButton(
-            icon: Icon(
-              Icons.refresh,
-              color: colorScheme.onSurface,
-            ),
+            icon: Icon(Icons.refresh, color: colorScheme.onSurface),
             onPressed: _loadProfileData,
             tooltip: 'Refresh',
           ),
@@ -90,8 +89,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       body: _isLoading
           ? _buildLoadingState()
           : _errorMessage != null
-              ? _buildErrorState()
-              : _buildContent(user, colorScheme, textTheme),
+          ? _buildErrorState()
+          : _buildContent(user, colorScheme, textTheme),
     );
   }
 
@@ -218,11 +217,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: colorScheme.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: colorScheme.error),
             const SizedBox(height: AppSpacing.xl),
             Text(
               'Unable to Load Profile',
@@ -235,9 +230,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: AppSpacing.sm),
             Text(
               _errorMessage ?? 'An error occurred',
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+              style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -257,9 +250,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 child: Text(
                   'Try Again',
-                  style: textTheme.labelLarge?.copyWith(
-                    color: colorScheme.onPrimary,
-                  ),
+                  style: textTheme.labelLarge?.copyWith(color: colorScheme.onPrimary),
                 ),
               ),
             ),
@@ -323,10 +314,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               shape: BoxShape.circle,
               color: colorScheme.primaryContainer,
               image: avatarUrl != null
-                  ? DecorationImage(
-                      image: NetworkImage(avatarUrl),
-                      fit: BoxFit.cover,
-                    )
+                  ? DecorationImage(image: NetworkImage(avatarUrl), fit: BoxFit.cover)
                   : null,
             ),
             child: avatarUrl == null
@@ -359,9 +347,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           // Email
           Text(
             user.email ?? '',
-            style: textTheme.bodyLarge?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
+            style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
             textAlign: TextAlign.center,
           ),
 
@@ -373,22 +359,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             height: 44,
             child: OutlinedButton.icon(
               onPressed: _editProfile,
-              icon: Icon(
-                Icons.edit_outlined,
-                size: 18,
-                color: colorScheme.primary,
-              ),
+              icon: Icon(Icons.edit_outlined, size: 18, color: colorScheme.primary),
               label: Text(
                 'Edit Profile',
-                style: textTheme.labelLarge?.copyWith(
-                  color: colorScheme.primary,
-                  fontSize: 14,
-                ),
+                style: textTheme.labelLarge?.copyWith(color: colorScheme.primary, fontSize: 14),
               ),
               style: OutlinedButton.styleFrom(
-                side: BorderSide(
-                  color: colorScheme.outline,
-                ),
+                side: BorderSide(color: colorScheme.outline),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                 ),
@@ -400,8 +377,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildSyncSection(ColorScheme colorScheme, TextTheme textTheme,
-      SyncState syncState, DateTime? lastSyncTime) {
+  Widget _buildSyncSection(
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    SyncState syncState,
+    DateTime? lastSyncTime,
+  ) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
       decoration: BoxDecoration(
@@ -415,11 +396,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           // Section header
           Row(
             children: [
-              Icon(
-                Icons.sync,
-                color: colorScheme.primary,
-                size: 20,
-              ),
+              Icon(Icons.sync, color: colorScheme.primary, size: 20),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 'Synchronization',
@@ -444,9 +421,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const SizedBox(width: AppSpacing.sm),
               Text(
                 'Status: ${_getSyncStatusText(syncState)}',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                ),
+                style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
               ),
             ],
           ),
@@ -456,17 +431,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           // Last sync time
           Row(
             children: [
-              Icon(
-                Icons.access_time,
-                color: colorScheme.onSurfaceVariant,
-                size: 16,
-              ),
+              Icon(Icons.access_time, color: colorScheme.onSurfaceVariant, size: 16),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 'Last sync: ${lastSyncTime != null ? _formatDateTime(lastSyncTime) : 'Never'}',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
+                style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -566,11 +535,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           // Section header
           Row(
             children: [
-              Icon(
-                Icons.settings_outlined,
-                color: colorScheme.primary,
-                size: 20,
-              ),
+              Icon(Icons.settings_outlined, color: colorScheme.primary, size: 20),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 'Settings',
@@ -636,11 +601,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           // Section header
           Row(
             children: [
-              Icon(
-                Icons.account_circle_outlined,
-                color: colorScheme.primary,
-                size: 20,
-              ),
+              Icon(Icons.account_circle_outlined, color: colorScheme.primary, size: 20),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 'Account',
@@ -685,9 +646,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               icon: const Icon(Icons.logout, size: 20),
               label: Text(
                 'Sign Out',
-                style: textTheme.labelLarge?.copyWith(
-                  color: colorScheme.onError,
-                ),
+                style: textTheme.labelLarge?.copyWith(color: colorScheme.onError),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: colorScheme.error,
@@ -722,31 +681,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
         child: Container(
           constraints: const BoxConstraints(minHeight: AppSpacing.minTouchTarget),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.sm,
-            vertical: AppSpacing.sm,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
           child: Row(
             children: [
-              Icon(
-                icon,
-                size: 22,
-                color: iconColor ?? colorScheme.onSurfaceVariant,
-              ),
+              Icon(icon, size: 22, color: iconColor ?? colorScheme.onSurfaceVariant),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
                   title,
-                  style: textTheme.bodyLarge?.copyWith(
-                    color: textColor ?? colorScheme.onSurface,
-                  ),
+                  style: textTheme.bodyLarge?.copyWith(color: textColor ?? colorScheme.onSurface),
                 ),
               ),
-              Icon(
-                Icons.chevron_right,
-                size: 20,
-                color: colorScheme.onSurfaceVariant,
-              ),
+              Icon(Icons.chevron_right, size: 20, color: colorScheme.onSurfaceVariant),
             ],
           ),
         ),
@@ -839,9 +785,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           SnackBar(
             content: Text(
               'Sync failed: $e',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onError,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onError),
             ),
             backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
@@ -876,9 +822,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           SnackBar(
             content: Text(
               'Sync failed: $e',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onError,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onError),
             ),
             backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
@@ -921,22 +867,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: colorScheme.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusMd)),
         title: Row(
           children: [
-            Icon(
-              Icons.warning_amber_rounded,
-              color: colorScheme.error,
-              size: 24,
-            ),
+            Icon(Icons.warning_amber_rounded, color: colorScheme.error, size: 24),
             const SizedBox(width: AppSpacing.sm),
             Text(
               'Delete Account',
-              style: textTheme.titleLarge?.copyWith(
-                color: colorScheme.onSurface,
-              ),
+              style: textTheme.titleLarge?.copyWith(color: colorScheme.onSurface),
             ),
           ],
         ),
@@ -946,23 +884,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           children: [
             Text(
               'This action cannot be undone. All your data will be permanently deleted:',
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+              style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               '• All notes and attachments\n• Tags and folders\n• Profile information\n• Account settings',
-              style: textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+              style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
               'Type DELETE to confirm:',
-              style: textTheme.labelLarge?.copyWith(
-                color: colorScheme.error,
-              ),
+              style: textTheme.labelLarge?.copyWith(color: colorScheme.error),
             ),
             const SizedBox(height: AppSpacing.xs),
             TextField(
@@ -970,29 +902,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               style: textTheme.bodyLarge,
               decoration: InputDecoration(
                 hintText: 'DELETE',
-                hintStyle: textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
+                hintStyle: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                  borderSide: BorderSide(
-                    color: colorScheme.error,
-                    width: 1.5,
-                  ),
+                  borderSide: BorderSide(color: colorScheme.error, width: 1.5),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                  borderSide: BorderSide(
-                    color: colorScheme.outline,
-                    width: 1,
-                  ),
+                  borderSide: BorderSide(color: colorScheme.outline, width: 1),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                  borderSide: BorderSide(
-                    color: colorScheme.error,
-                    width: 1.5,
-                  ),
+                  borderSide: BorderSide(color: colorScheme.error, width: 1.5),
                 ),
                 filled: true,
                 fillColor: colorScheme.surface,
@@ -1009,9 +930,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text(
               'Cancel',
-              style: textTheme.labelLarge?.copyWith(
-                color: colorScheme.primary,
-              ),
+              style: textTheme.labelLarge?.copyWith(color: colorScheme.primary),
             ),
           ),
           ElevatedButton(
@@ -1024,9 +943,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   SnackBar(
                     content: Text(
                       'Please type DELETE to confirm',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onError,
-                      ),
+                      style: textTheme.bodyMedium?.copyWith(color: colorScheme.onError),
                     ),
                     backgroundColor: colorScheme.error,
                     behavior: SnackBarBehavior.floating,
@@ -1042,9 +959,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             child: Text(
               'Delete Permanently',
-              style: textTheme.labelLarge?.copyWith(
-                color: colorScheme.onError,
-              ),
+              style: textTheme.labelLarge?.copyWith(color: colorScheme.onError),
             ),
           ),
         ],
@@ -1059,31 +974,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     // Show loading dialog
-    unawaited(showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: colorScheme.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(
-              color: colorScheme.primary,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              'Deleting account...',
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface,
+    unawaited(
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          backgroundColor: colorScheme.surface,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusMd)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(color: colorScheme.primary),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                'Deleting account...',
+                style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ));
+    );
 
     try {
       final authActions = ref.read(authActionsProvider);
@@ -1101,7 +1012,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         Navigator.of(context).pop(); // Close loading dialog
 
         // Account deleted, redirect to login
-        context.go('/login');
+        context.go(AppRoutes.login);
 
         // Show success message with statistics
         final deletedCounts = result['deleted_counts'] as Map<String, dynamic>?;
@@ -1115,9 +1026,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               SnackBar(
                 content: Text(
                   'Account deleted: $notesCount notes, $tagsCount tags, $attachmentsCount attachments',
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onInverseSurface,
-                  ),
+                  style: textTheme.bodyMedium?.copyWith(color: colorScheme.onInverseSurface),
                 ),
                 backgroundColor: colorScheme.inverseSurface,
                 behavior: SnackBarBehavior.floating,
@@ -1134,9 +1043,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           SnackBar(
             content: Text(
               'Error deleting account: $e',
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onError,
-              ),
+              style: textTheme.bodyMedium?.copyWith(color: colorScheme.onError),
             ),
             backgroundColor: colorScheme.error,
             behavior: SnackBarBehavior.floating,
@@ -1153,7 +1060,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       await authActions.signOut();
 
       if (mounted) {
-        context.go('/login');
+        context.go(AppRoutes.login);
       }
     } catch (e) {
       if (mounted) {
@@ -1161,9 +1068,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           SnackBar(
             content: Text(
               'Error signing out: $e',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onError,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onError),
             ),
             backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,

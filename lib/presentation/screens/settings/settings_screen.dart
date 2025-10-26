@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ai_organizer/core/navigation/app_routes.dart';
 import 'package:ai_organizer/core/theme/app_spacing.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -12,7 +12,7 @@ class SettingsScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: colorScheme.surfaceContainerLowest,
       appBar: AppBar(
         title: Text('settings.title'.tr()),
         backgroundColor: colorScheme.surface,
@@ -30,16 +30,18 @@ class SettingsScreen extends StatelessWidget {
             children: [
               _SettingItem(
                 icon: Icons.palette_outlined,
-                title: 'settings.theme'.tr(),
-                subtitle: _getThemeText(context),
-                onTap: () => _showThemeActionSheet(context),
+                title: 'Appearance',
+                subtitle: 'Theme and display settings',
+                showChevron: true,
+                onTap: () => context.push(AppRoutes.appearanceSettings),
               ),
               _SettingDivider(),
               _SettingItem(
                 icon: Icons.language_outlined,
-                title: 'settings.language'.tr(),
-                subtitle: _getLanguageText(context),
-                onTap: () => _showLanguageActionSheet(context),
+                title: 'Language',
+                subtitle: 'App language',
+                showChevron: true,
+                onTap: () => context.push(AppRoutes.languageSettings),
               ),
             ],
           ),
@@ -55,7 +57,7 @@ class SettingsScreen extends StatelessWidget {
                 title: 'Export & Import',
                 subtitle: 'Backup, export, and import notes',
                 showChevron: true,
-                onTap: () => context.go('/settings/export-import'),
+                onTap: () => context.push(AppRoutes.exportImport),
               ),
               _SettingDivider(),
               _SettingItem(
@@ -63,7 +65,7 @@ class SettingsScreen extends StatelessWidget {
                 title: 'Email Integration',
                 subtitle: 'Email-to-Note and Gmail import',
                 showChevron: true,
-                onTap: () => context.go('/settings/email-integration'),
+                onTap: () => context.push(AppRoutes.emailIntegration),
               ),
               _SettingDivider(),
               _SettingItem(
@@ -71,7 +73,7 @@ class SettingsScreen extends StatelessWidget {
                 title: 'Calendar Integration',
                 subtitle: 'Sync with Google Calendar',
                 showChevron: true,
-                onTap: () => context.go('/settings/calendar-integration'),
+                onTap: () => context.push(AppRoutes.calendarIntegration),
               ),
               _SettingDivider(),
               _SettingItem(
@@ -79,21 +81,23 @@ class SettingsScreen extends StatelessWidget {
                 title: 'Cloud Storage',
                 subtitle: 'Dropbox and Google Drive',
                 showChevron: true,
-                onTap: () => context.go('/settings/cloud-storage'),
+                onTap: () => context.push(AppRoutes.cloudStorage),
               ),
               _SettingDivider(),
               _SettingItem(
                 icon: Icons.notifications_outlined,
-                title: 'settings.notifications'.tr(),
+                title: 'Notifications',
+                subtitle: 'Alerts and reminders',
                 showChevron: true,
-                onTap: () {},
+                onTap: () => context.push(AppRoutes.notificationSettings),
               ),
               _SettingDivider(),
               _SettingItem(
-                icon: Icons.sync_outlined,
-                title: 'settings.sync'.tr(),
+                icon: Icons.cloud_outlined,
+                title: 'Storage & Sync',
+                subtitle: 'Cloud sync and storage',
                 showChevron: true,
-                onTap: () {},
+                onTap: () => context.push(AppRoutes.storageSyncSettings),
               ),
             ],
           ),
@@ -115,113 +119,6 @@ class SettingsScreen extends StatelessWidget {
 
           const SizedBox(height: AppSpacing.xl),
         ],
-      ),
-    );
-  }
-
-  String _getThemeText(BuildContext context) {
-    final themeMode = AdaptiveTheme.of(context).mode;
-    switch (themeMode) {
-      case AdaptiveThemeMode.light:
-        return 'settings.lightTheme'.tr();
-      case AdaptiveThemeMode.dark:
-        return 'settings.darkTheme'.tr();
-      case AdaptiveThemeMode.system:
-        return 'settings.systemTheme'.tr();
-    }
-  }
-
-  String _getLanguageText(BuildContext context) {
-    final locale = context.locale;
-    switch (locale.languageCode) {
-      case 'en':
-        return 'English';
-      case 'es':
-        return 'Español';
-      case 'fr':
-        return 'Français';
-      case 'de':
-        return 'Deutsch';
-      case 'ja':
-        return '日本語';
-      case 'zh':
-        return '中文';
-      case 'ar':
-        return 'العربية';
-      default:
-        return 'English';
-    }
-  }
-
-  void _showThemeActionSheet(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _ActionSheet(
-        title: 'settings.theme'.tr(),
-        items: [
-          _ActionSheetItem(
-            icon: Icons.light_mode_outlined,
-            title: 'settings.lightTheme'.tr(),
-            isSelected: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.light,
-            onTap: () {
-              AdaptiveTheme.of(context).setLight();
-              Navigator.of(context).pop();
-            },
-          ),
-          _ActionSheetItem(
-            icon: Icons.dark_mode_outlined,
-            title: 'settings.darkTheme'.tr(),
-            isSelected: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.dark,
-            onTap: () {
-              AdaptiveTheme.of(context).setDark();
-              Navigator.of(context).pop();
-            },
-          ),
-          _ActionSheetItem(
-            icon: Icons.brightness_auto_outlined,
-            title: 'settings.systemTheme'.tr(),
-            isSelected: AdaptiveTheme.of(context).mode == AdaptiveThemeMode.system,
-            onTap: () {
-              AdaptiveTheme.of(context).setSystem();
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showLanguageActionSheet(BuildContext context) {
-    final languages = [
-      {'code': 'en', 'name': 'English', 'locale': const Locale('en', 'US')},
-      {'code': 'es', 'name': 'Español', 'locale': const Locale('es', 'ES')},
-      {'code': 'fr', 'name': 'Français', 'locale': const Locale('fr', 'FR')},
-      {'code': 'de', 'name': 'Deutsch', 'locale': const Locale('de', 'DE')},
-      {'code': 'ja', 'name': '日本語', 'locale': const Locale('ja', 'JP')},
-      {'code': 'zh', 'name': '中文', 'locale': const Locale('zh', 'CN')},
-      {'code': 'ar', 'name': 'العربية', 'locale': const Locale('ar', 'SA')},
-    ];
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _ActionSheet(
-        title: 'settings.language'.tr(),
-        items: languages.map((lang) {
-          return _ActionSheetItem(
-            icon: Icons.language,
-            title: lang['name'] as String,
-            isSelected: context.locale.languageCode == lang['code'],
-            onTap: () {
-              context.setLocale(lang['locale'] as Locale);
-              Navigator.of(context).pop();
-            },
-          );
-        }).toList(),
       ),
     );
   }
@@ -253,9 +150,10 @@ class _SettingSection extends StatelessWidget {
           ),
           child: Text(
             title,
-            style: textTheme.titleMedium?.copyWith(
-              color: colorScheme.primary,
+            style: textTheme.titleSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
             ),
           ),
         ),
@@ -302,16 +200,22 @@ class _SettingItem extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-        splashColor: colorScheme.primary.withOpacity(0.1),
-        highlightColor: colorScheme.primary.withOpacity(0.05),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
+        splashColor: colorScheme.onSurface.withValues(alpha: 0.06),
+        highlightColor: colorScheme.onSurface.withValues(alpha: 0.03),
+        child: Container(
+          constraints: const BoxConstraints(
+            minHeight: AppSpacing.minTouchTarget,
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
           child: Row(
             children: [
               // Icon
               Icon(
                 icon,
-                size: AppSpacing.iconSize,
+                size: 24,
                 color: colorScheme.onSurfaceVariant,
               ),
 
@@ -321,6 +225,7 @@ class _SettingItem extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       title,
@@ -348,7 +253,7 @@ class _SettingItem extends StatelessWidget {
                 Icon(
                   Icons.chevron_right,
                   size: 20,
-                  color: colorScheme.onSurfaceVariant,
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
               ],
             ],
@@ -366,153 +271,11 @@ class _SettingDivider extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.only(left: AppSpacing.md + AppSpacing.iconSize + AppSpacing.md),
+      padding: const EdgeInsets.only(left: AppSpacing.md + 24 + AppSpacing.md),
       child: Divider(
         height: 1,
         thickness: 1,
         color: colorScheme.outlineVariant,
-      ),
-    );
-  }
-}
-
-/// Custom action sheet following UI/UX guidelines (dark modal)
-class _ActionSheet extends StatelessWidget {
-  final String title;
-  final List<_ActionSheetItem> items;
-
-  const _ActionSheet({
-    required this.title,
-    required this.items,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF3A3A3A), // Dark gray modal background from guidelines
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppSpacing.radiusMd),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x33000000), // 20% black
-            blurRadius: 24,
-            offset: Offset(0, -4),
-            spreadRadius: 0,
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Handle indicator
-            Container(
-              width: 36,
-              height: 4,
-              margin: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: const Color(0xFF6B6B6B),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-
-            // Title
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.xl,
-                vertical: AppSpacing.sm,
-              ),
-              child: Text(
-                title,
-                style: textTheme.titleMedium?.copyWith(
-                  color: const Color(0xFFFFFFFF), // White text on dark modal
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: AppSpacing.xs),
-
-            // Action items
-            ...items,
-
-            const SizedBox(height: AppSpacing.md),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Action sheet item widget
-class _ActionSheetItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final bool isSelected;
-  final bool isDestructive;
-  final VoidCallback onTap;
-
-  const _ActionSheetItem({
-    required this.icon,
-    required this.title,
-    this.isSelected = false,
-    this.isDestructive = false,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    final textColor = isDestructive
-        ? const Color(0xFFFF5454)
-        : const Color(0xFFFFFFFF);
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xl,
-            vertical: AppSpacing.md,
-          ),
-          child: Row(
-            children: [
-              // Icon
-              Icon(
-                icon,
-                size: 22,
-                color: textColor,
-              ),
-
-              const SizedBox(width: AppSpacing.md),
-
-              // Title
-              Expanded(
-                child: Text(
-                  title,
-                  style: textTheme.bodyLarge?.copyWith(
-                    color: textColor,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ),
-
-              // Check mark for selected item
-              if (isSelected)
-                const Icon(
-                  Icons.check,
-                  size: 22,
-                  color: Color(0xFF007AFF), // iOS blue
-                ),
-            ],
-          ),
-        ),
       ),
     );
   }

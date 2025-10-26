@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ai_organizer/core/navigation/app_routes.dart';
 import 'package:ai_organizer/core/theme/app_spacing.dart';
 import 'package:ai_organizer/data/models/attachment.dart';
 import 'package:ai_organizer/data/models/note.dart';
@@ -1022,7 +1023,7 @@ class _NoteEditScreenState extends ConsumerState<NoteEditScreen> {
 
       // Navigate to note detail if this was a new note
       if (widget.noteId == null) {
-        context.go('/notes/${note.id}');
+        context.go(AppRoutes.noteDetail(note.id));
       }
     } catch (e) {
       final colorScheme = Theme.of(context).colorScheme;

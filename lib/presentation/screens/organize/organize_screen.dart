@@ -1,3 +1,4 @@
+import 'package:ai_organizer/core/navigation/app_routes.dart';
 import 'package:ai_organizer/core/theme/app_spacing.dart';
 import 'package:ai_organizer/data/models/folder.dart';
 import 'package:ai_organizer/presentation/widgets/action_sheet.dart';
@@ -113,7 +114,7 @@ class _OrganizeScreenState extends ConsumerState<OrganizeScreen> {
             color: Colors.transparent,
             child: InkWell(
               onTap: () {
-                context.go('/notes');
+                context.push(AppRoutes.notes);
               },
               borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
               child: Padding(
@@ -140,9 +141,8 @@ class _OrganizeScreenState extends ConsumerState<OrganizeScreen> {
         // Folder tree
         Expanded(
           child: FolderTree(
-            showNoteCounts: true,
             onFolderTap: (folder) {
-              context.go('/notes?folderId=${folder.id}');
+              context.push(AppRoutes.notesWithFolder(folder.id));
             },
             onFolderLongPress: (folder) {
               _showFolderOptionsBottomSheet(context, folder);
@@ -565,7 +565,7 @@ class _OrganizeScreenState extends ConsumerState<OrganizeScreen> {
                             decoration: BoxDecoration(
                               color: displayColor,
                               shape: BoxShape.circle,
-                              border: Border.all(color: colorScheme.outline, width: 1),
+                              border: Border.all(color: colorScheme.outline),
                             ),
                           ),
                           const SizedBox(width: AppSpacing.md),

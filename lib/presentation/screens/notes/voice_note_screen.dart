@@ -10,6 +10,7 @@ import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ai_organizer/core/navigation/app_routes.dart';
 import 'package:ai_organizer/core/theme/app_spacing.dart';
 import 'package:ai_organizer/providers/notes_provider.dart';
 import 'package:ai_organizer/providers/database_provider.dart';
@@ -350,7 +351,7 @@ class _VoiceNoteScreenState extends ConsumerState<VoiceNoteScreen>
         _showSnackBar('Voice note saved successfully!');
 
         // Navigate back to the notes list
-        context.go('/notes');
+        context.go(AppRoutes.notes);
       }
     } catch (e) {
       debugPrint('Error saving voice note: $e');

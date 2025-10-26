@@ -1,6 +1,6 @@
 import 'package:ai_organizer/core/navigation/app_router.dart';
+import 'package:ai_organizer/core/navigation/app_routes.dart';
 import 'package:ai_organizer/core/theme/app_spacing.dart';
-import 'package:ai_organizer/presentation/widgets/app_bottom_nav.dart';
 import 'package:ai_organizer/presentation/widgets/empty_state.dart';
 import 'package:ai_organizer/providers/notes_provider.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -44,12 +44,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             actions: [
               IconButton(
                 icon: Icon(Icons.search, color: colorScheme.onSurface),
-                onPressed: () => context.go('/notes'),
+                onPressed: () => context.push(AppRoutes.notes),
                 tooltip: 'navigation.search'.tr(),
               ),
               IconButton(
                 icon: Icon(Icons.person_outline, color: colorScheme.onSurface),
-                onPressed: () => context.go('/profile'),
+                onPressed: () => context.goProfile(),
                 tooltip: 'navigation.profile'.tr(),
               ),
               const SizedBox(width: AppSpacing.xs),
@@ -105,7 +105,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
       floatingActionButton: _buildFAB(context, colorScheme),
-      bottomNavigationBar: AppBottomNav.fromRoute('/'),
     );
   }
 
@@ -127,7 +126,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             label: 'capture.quickText'.tr(),
             background: colorScheme.primaryContainer,
             foreground: colorScheme.onPrimaryContainer,
-            onTap: () => context.go('/notes/create'),
+            onTap: () => context.push(AppRoutes.noteCreate),
           ),
           const SizedBox(width: AppSpacing.sm),
           _buildCaptureChip(
@@ -320,7 +319,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             textTheme,
             title: 'sections.recent'.tr(),
             trailing: TextButton(
-              onPressed: () => context.go('/notes'),
+              onPressed: () => context.push(AppRoutes.notes),
               style: TextButton.styleFrom(foregroundColor: colorScheme.primary),
               child: Text('common.all'.tr(), style: textTheme.labelLarge?.copyWith(color: colorScheme.primary)),
             ),
@@ -333,7 +332,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               title: 'notes.empty'.tr(),
               message: 'notes.emptyDescription'.tr(),
               actionText: 'notes.create'.tr(),
-              onAction: () => context.go('/notes/create'),
+              onAction: () => context.push(AppRoutes.noteCreate),
             ));
           } else {
             children.add(
@@ -353,7 +352,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               title: 'notes.noFavorites'.tr(),
               message: 'notes.noFavoritesDescription'.tr(),
               actionText: 'notes.create'.tr(),
-              onAction: () => context.go('/notes/create'),
+              onAction: () => context.push(AppRoutes.noteCreate),
             ));
           } else {
             children.add(_buildSectionHeader(
@@ -426,7 +425,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => context.go('/notes/${note.id}'),
+          onTap: () => context.push(AppRoutes.noteDetail(note.id)),
           borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.cardPadding),
@@ -496,7 +495,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         vertical: AppSpacing.xxs,
                       ),
                       decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
                       ),
                       child: Text(
@@ -795,7 +794,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onTapUp: (_) => setState(() => _isFabPressed = false),
             onTapCancel: () => setState(() => _isFabPressed = false),
             borderRadius: BorderRadius.circular(28),
-            splashColor: colorScheme.onPrimary.withOpacity(0.2),
+            splashColor: colorScheme.onPrimary.withValues(alpha: 0.2),
             child: Center(
               child: Icon(
                 Icons.add,
@@ -851,7 +850,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 label: 'capture.textNote'.tr(),
                 onTap: () {
                   Navigator.of(context).pop();
-                  context.go('/notes/create');
+                  context.go(AppRoutes.noteCreate);
                 },
               ),
               _buildCaptureOption(
