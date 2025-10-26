@@ -1,19 +1,20 @@
 import 'dart:async';
+
+import 'package:ai_organizer/core/navigation/app_routes.dart';
+import 'package:ai_organizer/core/theme/app_spacing.dart';
+import 'package:ai_organizer/data/models/note.dart';
+import 'package:ai_organizer/presentation/widgets/action_sheet.dart';
+import 'package:ai_organizer/presentation/widgets/app_search_bar.dart';
+import 'package:ai_organizer/presentation/widgets/note_card.dart';
+import 'package:ai_organizer/presentation/widgets/simple_tab_bar.dart';
+import 'package:ai_organizer/presentation/widgets/skeletons/note_list_skeleton.dart';
+import 'package:ai_organizer/providers/folder_provider.dart';
+import 'package:ai_organizer/providers/notes_provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ai_organizer/core/navigation/app_routes.dart';
-import 'package:ai_organizer/core/theme/app_spacing.dart';
-import 'package:ai_organizer/providers/folder_provider.dart';
-import 'package:ai_organizer/providers/notes_provider.dart';
-import 'package:ai_organizer/data/models/note.dart';
-import 'package:ai_organizer/presentation/widgets/note_card.dart';
-import 'package:ai_organizer/presentation/widgets/app_search_bar.dart';
-import 'package:ai_organizer/presentation/widgets/simple_tab_bar.dart';
-import 'package:ai_organizer/presentation/widgets/action_sheet.dart';
-import 'package:ai_organizer/presentation/widgets/skeletons/note_list_skeleton.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Notes list screen - displays all notes with search and filtering
@@ -65,8 +66,8 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
     final notesAsync = _searchQuery.isNotEmpty
         ? ref.watch(searchNotesProvider(_searchQuery))
         : (widget.folderId != null && _filterOption == NoteFilterOption.all)
-            ? ref.watch(notesByFolderProvider(widget.folderId))
-            : _getFilteredNotesProvider();
+        ? ref.watch(notesByFolderProvider(widget.folderId))
+        : _getFilteredNotesProvider();
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -89,16 +90,10 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
                       )
                     : null,
                 title: _isSelectionMode
-                    ? Text(
-                        '${_selectedNoteIds.length} selected',
-                        style: textTheme.titleLarge,
-                      )
+                    ? Text('${_selectedNoteIds.length} selected', style: textTheme.titleLarge)
                     : widget.folderId != null
-                        ? _buildFolderTitle(context)
-                        : Text(
-                            'navigation.notes'.tr(),
-                            style: textTheme.displaySmall,
-                          ),
+                    ? _buildFolderTitle(context)
+                    : Text('navigation.notes'.tr(), style: textTheme.displaySmall),
                 actions: [
                   if (!_isSelectionMode) ...[
                     IconButton(
@@ -134,10 +129,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
                   maxExtent: 76,
                   child: Container(
                     color: colorScheme.surface,
-                    padding: const EdgeInsets.only(
-                      top: AppSpacing.xs,
-                      bottom: AppSpacing.xs,
-                    ),
+                    padding: const EdgeInsets.only(top: AppSpacing.xs, bottom: AppSpacing.xs),
                     child: AppSearchBar(
                       margin: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.screenHorizontal,
@@ -186,22 +178,14 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
               // Content
               ...notesAsync.when(
                 data: (notes) => _buildNotesSlivers(context, notes),
-                loading: () => [
-                  SliverToBoxAdapter(
-                    child: NoteListSkeleton(isGrid: _isGridView),
-                  ),
-                ],
+                loading: () => [SliverToBoxAdapter(child: NoteListSkeleton(isGrid: _isGridView))],
                 error: (error, stackTrace) => [
-                  SliverToBoxAdapter(
-                    child: _buildErrorState(context, error.toString()),
-                  ),
+                  SliverToBoxAdapter(child: _buildErrorState(context, error.toString())),
                 ],
               ),
 
               // Add bottom space for FAB
-              const SliverToBoxAdapter(
-                child: SizedBox(height: AppSpacing.xxxl * 2),
-              ),
+              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxxl * 2)),
             ],
           ),
 
@@ -221,9 +205,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
                   decoration: BoxDecoration(
                     color: colorScheme.surface,
                     boxShadow: AppShadows.modalShadow,
-                    border: Border(
-                      top: BorderSide(color: colorScheme.outlineVariant),
-                    ),
+                    border: Border(top: BorderSide(color: colorScheme.outlineVariant)),
                   ),
                   child: Row(
                     children: [
@@ -294,31 +276,21 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.folder,
-            size: 16,
-            color: colorScheme.onSurfaceVariant,
-          ),
+          Icon(Icons.folder, size: 16, color: colorScheme.onSurfaceVariant),
           const SizedBox(width: AppSpacing.xs),
           Text(
             'Showing notes in:',
-            style: textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
+            style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Consumer(
               builder: (context, ref, child) {
-                final folderAsync =
-                    ref.watch(folderByIdProvider(widget.folderId!));
+                final folderAsync = ref.watch(folderByIdProvider(widget.folderId!));
                 return folderAsync.when(
                   data: (folder) => Chip(
                     backgroundColor: colorScheme.surfaceContainerHighest,
-                    label: Text(
-                      folder?.name ?? 'Unknown',
-                      style: textTheme.labelMedium,
-                    ),
+                    label: Text(folder?.name ?? 'Unknown', style: textTheme.labelMedium),
                     deleteIcon: const Icon(Icons.close, size: 16),
                     onDeleted: () => context.go(AppRoutes.notes),
                   ),
@@ -375,8 +347,8 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
       final crossAxisCount = width >= 900
           ? 4
           : width >= 700
-              ? 3
-              : 2;
+          ? 3
+          : 2;
       return [
         SliverPadding(
           padding: listPadding.copyWith(bottom: AppSpacing.xxxl * 2),
@@ -387,58 +359,55 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
               mainAxisSpacing: AppSpacing.sm,
               childAspectRatio: 3 / 2,
             ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final note = items[index];
-                final isSelected = _selectedNoteIds.contains(note.id);
-                return _buildDismissible(
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final note = items[index];
+              final isSelected = _selectedNoteIds.contains(note.id);
+              return _buildDismissible(
+                note: note,
+                child: NoteCard(
                   note: note,
-                  child: NoteCard(
-                    note: note,
-                    isSelected: isSelected,
-                    compact: true,
-                    variant: NoteCardVariant.grid,
-                    margin: EdgeInsets.zero,
-                    onTap: () async {
-                      await HapticFeedback.selectionClick();
-                      if (_isSelectionMode) {
-                        _toggleNoteSelection(note.id);
-                      } else {
-                        context.push(AppRoutes.noteDetail(note.id));
-                      }
-                    },
-                    onLongPress: () async {
-                      await HapticFeedback.selectionClick();
-                      if (!_isSelectionMode) {
-                        setState(() {
-                          _isSelectionMode = true;
-                          _selectedNoteIds.add(note.id);
-                        });
-                      }
-                    },
-                    trailing: _isSelectionMode
-                        ? Checkbox(
-                            value: isSelected,
-                            onChanged: (_) async {
-                              await HapticFeedback.selectionClick();
-                              _toggleNoteSelection(note.id);
-                            },
-                          )
-                        : IconButton(
-                            icon: const Icon(Icons.more_vert),
-                            iconSize: 20,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(
-                              minWidth: AppSpacing.minTouchTarget,
-                              minHeight: AppSpacing.minTouchTarget,
-                            ),
-                            onPressed: () => _showNoteActions(context, note),
+                  isSelected: isSelected,
+                  compact: true,
+                  variant: NoteCardVariant.grid,
+                  margin: EdgeInsets.zero,
+                  onTap: () async {
+                    unawaited(HapticFeedback.selectionClick());
+                    if (_isSelectionMode) {
+                      _toggleNoteSelection(note.id);
+                    } else {
+                      unawaited(context.push(AppRoutes.noteDetail(note.id)));
+                    }
+                  },
+                  onLongPress: () async {
+                    unawaited(HapticFeedback.selectionClick());
+                    if (!_isSelectionMode) {
+                      setState(() {
+                        _isSelectionMode = true;
+                        _selectedNoteIds.add(note.id);
+                      });
+                    }
+                  },
+                  trailing: _isSelectionMode
+                      ? Checkbox(
+                          value: isSelected,
+                          onChanged: (_) async {
+                            await HapticFeedback.selectionClick();
+                            _toggleNoteSelection(note.id);
+                          },
+                        )
+                      : IconButton(
+                          icon: const Icon(Icons.more_vert),
+                          iconSize: 20,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: AppSpacing.minTouchTarget,
+                            minHeight: AppSpacing.minTouchTarget,
                           ),
-                  ),
-                );
-              },
-              childCount: items.length,
-            ),
+                          onPressed: () => _showNoteActions(context, note),
+                        ),
+                ),
+              );
+            }, childCount: items.length),
           ),
         ),
       ];
@@ -449,53 +418,53 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
         padding: listPadding.copyWith(bottom: AppSpacing.xxxl * 2),
         sliver: SliverList.separated(
           itemBuilder: (context, index) {
-          final note = items[index];
-          final isSelected = _selectedNoteIds.contains(note.id);
-          return _buildDismissible(
-            note: note,
-            child: NoteCard(
+            final note = items[index];
+            final isSelected = _selectedNoteIds.contains(note.id);
+            return _buildDismissible(
               note: note,
-              isSelected: isSelected,
-              onTap: () async {
-                await HapticFeedback.selectionClick();
-                if (_isSelectionMode) {
-                  _toggleNoteSelection(note.id);
-                } else {
-                  context.push('/notes/${note.id}');
-                }
-              },
-              onLongPress: () async {
-                await HapticFeedback.selectionClick();
-                if (!_isSelectionMode) {
-                  setState(() {
-                    _isSelectionMode = true;
-                    _selectedNoteIds.add(note.id);
-                  });
-                }
-              },
-              trailing: _isSelectionMode
-                  ? Checkbox(
-                      value: isSelected,
-                      onChanged: (_) async {
-                        await HapticFeedback.selectionClick();
-                        _toggleNoteSelection(note.id);
-                      },
-                    )
-                  : IconButton(
-                      icon: const Icon(Icons.more_vert),
-                      iconSize: 20,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: AppSpacing.minTouchTarget,
-                        minHeight: AppSpacing.minTouchTarget,
+              child: NoteCard(
+                note: note,
+                isSelected: isSelected,
+                onTap: () async {
+                  await HapticFeedback.selectionClick();
+                  if (_isSelectionMode) {
+                    _toggleNoteSelection(note.id);
+                  } else {
+                    unawaited(context.push('/notes/${note.id}'));
+                  }
+                },
+                onLongPress: () async {
+                  await HapticFeedback.selectionClick();
+                  if (!_isSelectionMode) {
+                    setState(() {
+                      _isSelectionMode = true;
+                      _selectedNoteIds.add(note.id);
+                    });
+                  }
+                },
+                trailing: _isSelectionMode
+                    ? Checkbox(
+                        value: isSelected,
+                        onChanged: (_) async {
+                          await HapticFeedback.selectionClick();
+                          _toggleNoteSelection(note.id);
+                        },
+                      )
+                    : IconButton(
+                        icon: const Icon(Icons.more_vert),
+                        iconSize: 20,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: AppSpacing.minTouchTarget,
+                          minHeight: AppSpacing.minTouchTarget,
+                        ),
+                        onPressed: () => _showNoteActions(context, note),
                       ),
-                      onPressed: () => _showNoteActions(context, note),
-                    ),
-            ),
-          );
-        },
-        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-        itemCount: items.length,
+              ),
+            );
+          },
+          separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+          itemCount: items.length,
         ),
       ),
     ];
@@ -629,12 +598,10 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
         sortedNotes.sort((a, b) => a.createdAt.compareTo(b.createdAt));
         break;
       case NoteSortOption.titleAsc:
-        sortedNotes.sort(
-            (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+        sortedNotes.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
         break;
       case NoteSortOption.titleDesc:
-        sortedNotes.sort(
-            (a, b) => b.title.toLowerCase().compareTo(a.title.toLowerCase()));
+        sortedNotes.sort((a, b) => b.title.toLowerCase().compareTo(a.title.toLowerCase()));
         break;
     }
 
@@ -651,29 +618,20 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              _getEmptyStateIcon(),
-              size: 64,
-              color: colorScheme.outlineVariant,
-            ),
+            Icon(_getEmptyStateIcon(), size: 64, color: colorScheme.outlineVariant),
             const SizedBox(height: AppSpacing.xl),
             Text(
               _getEmptyStateTitle(),
-              style: textTheme.titleLarge?.copyWith(
-                color: colorScheme.onSurface,
-              ),
+              style: textTheme.titleLarge?.copyWith(color: colorScheme.onSurface),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               _getEmptyStateDescription(),
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+              style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
-            if (_filterOption == NoteFilterOption.all &&
-                _searchQuery.isEmpty) ...[
+            if (_filterOption == NoteFilterOption.all && _searchQuery.isEmpty) ...[
               const SizedBox(height: AppSpacing.xl),
               FilledButton.icon(
                 onPressed: () => context.push(AppRoutes.noteCreate),
@@ -745,25 +703,17 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: colorScheme.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: colorScheme.error),
             const SizedBox(height: AppSpacing.lg),
             Text(
               'Error loading notes',
-              style: textTheme.titleLarge?.copyWith(
-                color: colorScheme.onSurface,
-              ),
+              style: textTheme.titleLarge?.copyWith(color: colorScheme.onSurface),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               error,
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+              style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -804,9 +754,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
           },
         ),
         ActionSheetItem(
-          title: note.isFavorite
-              ? 'notes.unfavorite'.tr()
-              : 'notes.favorite'.tr(),
+          title: note.isFavorite ? 'notes.unfavorite'.tr() : 'notes.favorite'.tr(),
           icon: note.isFavorite ? Icons.favorite : Icons.favorite_outline,
           onTap: () async {
             final notesActions = ref.read(notesActionsProvider);
@@ -814,8 +762,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
           },
         ),
         ActionSheetItem(
-          title:
-              note.isArchived ? 'notes.unarchive'.tr() : 'notes.archive'.tr(),
+          title: note.isArchived ? 'notes.unarchive'.tr() : 'notes.archive'.tr(),
           icon: note.isArchived ? Icons.unarchive : Icons.archive,
           onTap: () async {
             final notesActions = ref.read(notesActionsProvider);
@@ -842,11 +789,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
       context: context,
       title: 'Batch Actions (${_selectedNoteIds.length} selected)',
       items: [
-        ActionSheetItem(
-          title: 'Pin/Unpin',
-          icon: Icons.push_pin,
-          onTap: () => _batchTogglePin(),
-        ),
+        ActionSheetItem(title: 'Pin/Unpin', icon: Icons.push_pin, onTap: () => _batchTogglePin()),
         ActionSheetItem(
           title: 'Archive/Unarchive',
           icon: Icons.archive,
@@ -887,9 +830,9 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
           icon: Icons.import_export,
           onTap: () {
             // TODO: Implement export functionality
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Export coming soon')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Export coming soon')));
           },
         ),
         ActionSheetItem(
@@ -963,9 +906,9 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
 
   void _shareNote(Note note) {
     // TODO: Implement actual sharing
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Share functionality coming soon')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Share functionality coming soon')));
   }
 
   void _confirmDeleteNote(BuildContext context, Note note) {
@@ -977,10 +920,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: colorScheme.surface,
         title: Text('common.delete'.tr(), style: textTheme.titleLarge),
-        content: Text(
-          'Are you sure you want to delete this note?',
-          style: textTheme.bodyMedium,
-        ),
+        content: Text('Are you sure you want to delete this note?', style: textTheme.bodyMedium),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -995,11 +935,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(
-                      success
-                          ? 'Note deleted successfully'
-                          : 'Failed to delete note',
-                    ),
+                    content: Text(success ? 'Note deleted successfully' : 'Failed to delete note'),
                     backgroundColor: success
                         ? colorScheme.primaryContainer
                         : colorScheme.errorContainer,
@@ -1058,9 +994,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(
-                      'Deleted $successCount of $count note${count > 1 ? 's' : ''}',
-                    ),
+                    content: Text('Deleted $successCount of $count note${count > 1 ? 's' : ''}'),
                     backgroundColor: successCount == count
                         ? colorScheme.primaryContainer
                         : colorScheme.errorContainer,
@@ -1098,9 +1032,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
       final colorScheme = Theme.of(context).colorScheme;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Updated $successCount of $count note${count > 1 ? 's' : ''}',
-          ),
+          content: Text('Updated $successCount of $count note${count > 1 ? 's' : ''}'),
           backgroundColor: successCount == count
               ? colorScheme.primaryContainer
               : colorScheme.errorContainer,
@@ -1128,9 +1060,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
       final colorScheme = Theme.of(context).colorScheme;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Updated $successCount of $count note${count > 1 ? 's' : ''}',
-          ),
+          content: Text('Updated $successCount of $count note${count > 1 ? 's' : ''}'),
           backgroundColor: successCount == count
               ? colorScheme.primaryContainer
               : colorScheme.errorContainer,
@@ -1248,9 +1178,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
       context: context,
       builder: (context) => Dialog(
         backgroundColor: colorScheme.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusMd)),
         child: SizedBox(
           height: 500,
           width: 400,
@@ -1317,10 +1245,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
                           itemBuilder: (context, index) {
                             final folder = folders[index];
                             return ListTile(
-                              leading: Icon(
-                                Icons.folder,
-                                color: colorScheme.primary,
-                              ),
+                              leading: Icon(Icons.folder, color: colorScheme.primary),
                               title: Text(folder.name, style: textTheme.bodyLarge),
                               onTap: () async {
                                 Navigator.of(context).pop();
@@ -1330,15 +1255,11 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
                           },
                         );
                       },
-                      loading: () => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
+                      loading: () => const Center(child: CircularProgressIndicator()),
                       error: (error, _) => Center(
                         child: Text(
                           'Error: $error',
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.error,
-                          ),
+                          style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
                         ),
                       ),
                     );
@@ -1385,9 +1306,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
       final folderName = folderId == null ? 'root' : 'folder';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Moved $successCount of $count note${count > 1 ? 's' : ''} to $folderName',
-          ),
+          content: Text('Moved $successCount of $count note${count > 1 ? 's' : ''} to $folderName'),
           backgroundColor: successCount == count
               ? colorScheme.primaryContainer
               : colorScheme.errorContainer,
@@ -1410,11 +1329,7 @@ class _NotesListScreenState extends ConsumerState<NotesListScreen> {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.folder,
-              size: 20,
-              color: colorScheme.primary,
-            ),
+            Icon(Icons.folder, size: 20, color: colorScheme.primary),
             const SizedBox(width: AppSpacing.xs),
             Flexible(
               child: Text(
@@ -1449,7 +1364,9 @@ class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(covariant _PinnedHeaderDelegate oldDelegate) {
-    return oldDelegate.child != child || oldDelegate.minExtent != minExtent || oldDelegate.maxExtent != maxExtent;
+    return oldDelegate.child != child ||
+        oldDelegate.minExtent != minExtent ||
+        oldDelegate.maxExtent != maxExtent;
   }
 }
 
